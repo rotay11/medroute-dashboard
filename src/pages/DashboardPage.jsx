@@ -191,6 +191,11 @@ function AddDriverModal({ onClose, onSave, token }) {
                 </div>
               </div>
               <div style={mStyles.field}>
+                <label style={mStyles.label}>Zip codes (comma separated)</label>
+                <input style={mStyles.input} value={form.zipCodes} onChange={e => update('zipCodes', e.target.value)} placeholder="94546, 94552, 94578" />
+                <div style={{fontSize:10,color:'#888',marginTop:3}}>Deliveries in these zip codes auto-assign to this driver</div>
+              </div>
+              <div style={mStyles.field}>
                 <label style={mStyles.label}>Shift</label>
                 <select style={mStyles.input} value={form.shiftType} onChange={e => update('shiftType', e.target.value)}>
                   {shifts.map(s => <option key={s} value={s}>{s}</option>)}
@@ -458,6 +463,7 @@ function EditStaffModal({ staff, onClose, onSave, token }) {
     role:      staff.role      || 'DRIVER',
     language:  staff.language  || 'EN',
     zone:      staff.zone      || '',
+    zipCodes:  staff.zipCodes  || '',
     status:    staff.status    || 'ACTIVE',
   })
   const [loading, setLoading] = React.useState(false)
@@ -507,6 +513,11 @@ function EditStaffModal({ staff, onClose, onSave, token }) {
                 <label style={mStyles.label}>Zone</label>
                 <input style={mStyles.input} value={form.zone} onChange={e=>update('zone',e.target.value)} placeholder="e.g. Castro Valley" />
               </div>
+            </div>
+            <div style={mStyles.field}>
+              <label style={mStyles.label}>Zip codes (comma separated)</label>
+              <input style={mStyles.input} value={form.zipCodes} onChange={e=>update('zipCodes',e.target.value)} placeholder="94546, 94552, 94578" />
+              <div style={{fontSize:10,color:'#888',marginTop:3}}>Deliveries in these zip codes will be automatically assigned to this driver</div>
             </div>
             <div style={mStyles.section}>Account settings</div>
             <div style={mStyles.grid3}>
@@ -833,7 +844,7 @@ export default function DashboardPage({ user, onLogout }) {
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
-                <tr>{['Driver','Status','Zone','Language','Active stops','Last location','Actions'].map(h => <th key={h} style={styles.th}>{h}</th>)}</tr>
+                <tr>{['Driver','Status','Zone','Zip codes','Language','Active stops','Last location','Actions'].map(h => <th key={h} style={styles.th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {filteredDrivers.length === 0 && <tr><td colSpan={7} style={styles.empty}>No staff found</td></tr>}
@@ -849,6 +860,7 @@ export default function DashboardPage({ user, onLogout }) {
                       </td>
                       <td style={styles.td}><span style={{ ...styles.pill, ...statusStyle(driver.status) }}>{driver.status}</span></td>
                       <td style={styles.td}><span style={styles.zone}>{driver.zone}</span></td>
+                      <td style={styles.td}><span style={{fontSize:11,color:'#888',fontFamily:'monospace'}}>{driver.zipCodes || '—'}</span></td>
                       <td style={styles.td}><span style={{ ...styles.pill, ...(driver.language === 'ES' ? styles.pillES : styles.pillEN) }}>{driver.language}</span></td>
                       <td style={styles.td}>{driver.activeStops || 0} stops</td>
                       <td style={styles.td}>

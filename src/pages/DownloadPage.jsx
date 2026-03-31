@@ -1,6 +1,7 @@
 import React from 'react'
 
 const APK_URL = 'https://expo.dev/artifacts/eas/jYEuKTZLPefspX1QGSQLdf.apk'
+const IOS_URL = 'https://expo.dev/accounts/rotay11/projects/medroute-fresh/builds/8582969e-4afb-4295-9196-352bf5b9c59b'
 
 export default function DownloadPage() {
   return (
@@ -37,7 +38,10 @@ export default function DownloadPage() {
             <div style={styles.platformName}>iPhone (iOS)</div>
             <div style={styles.platformSub}>Open in Safari and add to home screen</div>
           </div>
-          <a href="/driver" style={{...styles.downloadBtn,background:'#333'}}>Open App</a>
+          <a href={IOS_URL} style={{...styles.downloadBtn,background:'#333'}}>Install iPhone App</a>
+          <div style={styles.step}><span style={styles.stepNum}>1</span><span>Tap Install iPhone App above</span></div>
+          <div style={styles.step}><span style={styles.stepNum}>2</span><span>Follow the prompts to install</span></div>
+          <div style={styles.step}><span style={styles.stepNum}>3</span><span>Enable Developer Mode in Settings → Privacy & Security</span></div>
         </div>
 
         <div style={styles.support}>Need help? Contact your dispatcher or administrator.</div>

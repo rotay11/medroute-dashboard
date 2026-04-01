@@ -16,6 +16,10 @@ export default function PortalApp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loginType, setLoginType] = useState('patient')
+  const [showChat, setShowChat] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
 
   useEffect(() => {
     const t = getToken()
@@ -67,6 +71,22 @@ export default function PortalApp() {
 
   function handleLogout() {
     clearToken(); setUserState(null); setDeliveries([]); setScreen('login')
+  }
+
+  async function sendMessage() {
+    if (!chatInput.trim() || chatLoading) return
+    const userMsg = chatInput.trim()
+    setChatInput('')
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }])
+    setChatLoading(true)
+    try {
+      const token = user?.portalToken
+      const res = await axios.post(API + '/api/portal/patient/' + token + '/chat', { message: userMsg })
+      setMessages(prev => [...prev, { role: 'agent', text: res.data.reply }])
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'agent', text: 'Sorry I could not process your question. Please contact Clayworth Pharmacy at (510) 537-9402.' }])
+    }
+    setChatLoading(false)
   }
 
   function getStatusColor(status) {
@@ -126,6 +146,9 @@ export default function PortalApp() {
           <div style={p.headerSub}>{user?.firstName} {user?.lastName || user?.name}</div>
         </div>
         <button style={p.logoutBtn} onClick={handleLogout}>Sign out</button>
+        <button onClick={() => { setShowChat(!showChat); if (!showChat && messages.length === 0) setMessages([{ role: 'agent', text: 'Hi ' + user?.firstName + '! I can help you track your medication delivery. What would you like to know?' }]) }} style={{...p.logoutBtn, background:'rgba(255,255,255,0.3)', marginLeft:8}}>
+          {showChat ? 'Close chat' : '💬 Ask about my delivery'}
+        </button>
       </div>
 
       <div style={p.body}>
@@ -188,7 +211,47 @@ export default function PortalApp() {
           </div>
         ))}
 
-        <div style={p.footer}>
+        {showChat && (
+        <div style={{position:'fixed', bottom:80, right:16, width:320, background:'#fff', borderRadius:16, boxShadow:'0 8px 32px rgba(0,0,0,0.15)', border:'1px solid #e0e0e0', zIndex:1000, display:'flex', flexDirection:'column', maxHeight:440}}>
+          <div style={{background:'#1D9E75', padding:'12px 16px', borderRadius:'16px 16px 0 0', display:'flex', alignItems:'center', gap:8}}>
+            <div style={{width:32, height:32, background:'rgba(255,255,255,0.2)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16}}>💊</div>
+            <div>
+              <div style={{color:'#fff', fontWeight:600, fontSize:14}}>MedRoute Assistant</div>
+              <div style={{color:'rgba(255,255,255,0.75)', fontSize:11}}>Clayworth Pharmacy</div>
+            </div>
+          </div>
+          <div style={{flex:1, overflowY:'auto', padding:12, display:'flex', flexDirection:'column', gap:8, minHeight:200, maxHeight:280}}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{display:'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'}}>
+                <div style={{
+                  maxWidth:'85%', padding:'8px 12px', borderRadius: msg.role === 'user' ? '12px 12px 0 12px' : '12px 12px 12px 0',
+                  background: msg.role === 'user' ? '#1D9E75' : '#f5f5f5',
+                  color: msg.role === 'user' ? '#fff' : '#333',
+                  fontSize:13, lineHeight:1.5
+                }}>{msg.text}</div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{display:'flex', justifyContent:'flex-start'}}>
+                <div style={{background:'#f5f5f5', padding:'8px 12px', borderRadius:'12px 12px 12px 0', fontSize:13, color:'#888'}}>Typing...</div>
+              </div>
+            )}
+          </div>
+          <div style={{padding:12, borderTop:'1px solid #eee', display:'flex', gap:8}}>
+            <input
+              style={{flex:1, border:'1px solid #ddd', borderRadius:8, padding:'8px 10px', fontSize:13, outline:'none'}}
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && sendMessage()}
+              placeholder="Ask about your delivery..."
+            />
+            <button onClick={sendMessage} disabled={chatLoading} style={{background:'#1D9E75', color:'#fff', border:'none', borderRadius:8, padding:'8px 14px', fontSize:13, cursor:'pointer', fontWeight:600}}>
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+      <div style={p.footer}>
           Powered by Clayworth Pharmacy · MedRoute
         </div>
       </div>

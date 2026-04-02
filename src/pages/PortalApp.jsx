@@ -16,6 +16,12 @@ export default function PortalApp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loginType, setLoginType] = useState('patient')
+  const [facilities, setFacilities] = useState([])
+  const [caregiverData, setCaregiverData] = useState(null)
+  const [selectedFacility, setSelectedFacility] = useState('')
+  const [careFirstName, setCareFirstName] = useState('')
+  const [careLastName, setCareLastName] = useState('')
+  const [careDob, setCareDob] = useState('')
   const [showChat, setShowChat] = useState(false)
   const [messages, setMessages] = useState([])
   const [chatInput, setChatInput] = useState('')
@@ -111,6 +117,42 @@ export default function PortalApp() {
     return '○'
   }
 
+
+  if (screen === 'caregiver') return (
+    <div style={p.container}>
+      <div style={p.header}>
+        <div style={p.logo}>💊</div>
+        <div style={p.brand}>MedRoute</div>
+        <div style={p.tagline}>Delivery Status</div>
+      </div>
+      <div style={p.card}>
+        <div style={{textAlign:'center', marginBottom:20}}>
+          <div style={{fontSize:32, marginBottom:8}}>📦</div>
+          <div style={{fontSize:16, fontWeight:600, color:'#333'}}>{caregiverData?.patient?.firstName} {caregiverData?.patient?.lastInitial}.</div>
+          <div style={{fontSize:13, color:'#888', marginTop:4}}>Delivery Status</div>
+        </div>
+        <div style={{background:'#f9f9f9', borderRadius:10, padding:16, marginBottom:16}}>
+          <div style={{fontSize:12, fontWeight:600, color:'#888', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8}}>Current Status</div>
+          <div style={{fontSize:15, fontWeight:600, color: caregiverData?.delivery?.status === 'DELIVERED' ? '#1D9E75' : '#BA7517'}}>
+            {caregiverData?.delivery?.status === 'IN_TRANSIT' ? '→ Out for delivery' :
+             caregiverData?.delivery?.status === 'PICKED_UP' ? '📦 Picked up from pharmacy' :
+             caregiverData?.delivery?.status === 'DELIVERED' ? '✓ Delivered' : '⏳ Being prepared'}
+          </div>
+          {caregiverData?.delivery?.itemCount > 0 && (
+            <div style={{fontSize:13, color:'#555', marginTop:6}}>{caregiverData.delivery.itemCount} item{caregiverData.delivery.itemCount > 1 ? 's' : ''} on the way</div>
+          )}
+          {caregiverData?.delivery?.driverName && (
+            <div style={{fontSize:13, color:'#555', marginTop:4}}>Driver: {caregiverData.delivery.driverName}</div>
+          )}
+        </div>
+        <div style={{background:'#FFF8EC', borderRadius:10, padding:14, marginBottom:16, borderLeft:'3px solid #BA7517'}}>
+          <div style={{fontSize:12, color:'#633806'}}>For more information contact Clayworth Pharmacy</div>
+          <div style={{fontSize:14, fontWeight:600, color:'#633806', marginTop:4}}>(510) 537-9402</div>
+        </div>
+        <button onClick={() => { setScreen('login'); setCaregiverData(null) }} style={{...p.btn, background:'#888'}}>Check another patient</button>
+      </div>
+    </div>
+  )
   if (screen === 'login') return (
     <div style={p.page}>
       <div style={p.card}>

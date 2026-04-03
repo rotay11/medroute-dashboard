@@ -30,7 +30,7 @@ export default function PortalApp() {
   useEffect(() => {
     const t = getToken()
     const u = getUser()
-    if (t && u) { setUserState(u); loadDeliveries(t, u.type === 'facility' ? 'facility' : 'patient'); setScreen('home') }
+    if (t && u && u.type !== 'caregiver') { setUserState(u); loadDeliveries(t, u.type === 'facility' ? 'facility' : 'patient'); setScreen('home') }
   }, [])
 
   async function loadDeliveries(token, type) {
@@ -144,6 +144,14 @@ export default function PortalApp() {
           {caregiverData?.delivery?.driverName && (
             <div style={{fontSize:13, color:'#555', marginTop:4}}>Driver: {caregiverData.delivery.driverName}</div>
           )}
+          {caregiverData?.medications && caregiverData.medications.length > 0 && (
+            <div style={{marginTop:12, paddingTop:12, borderTop:'1px solid #eee'}}>
+              <div style={{fontSize:11, fontWeight:600, color:'#888', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6}}>Medications</div>
+              {caregiverData.medications.map((m, i) => (
+                <div key={i} style={{fontSize:13, color:'#333', marginBottom:4}}>• {m.medication} {m.dosage}</div>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{background:'#FFF8EC', borderRadius:10, padding:14, marginBottom:16, borderLeft:'3px solid #BA7517'}}>
           <div style={{fontSize:12, color:'#633806'}}>For more information contact Clayworth Pharmacy</div>
@@ -166,15 +174,16 @@ export default function PortalApp() {
 
         <div style={p.toggleRow}>
           <button style={{...p.toggleBtn,...(loginType==='patient'?p.toggleActive:{})}} onClick={()=>{setLoginType('patient');setError('')}}>Patient</button>
-          <button style={{...p.toggleBtn,...(loginType==='facility'?p.toggleActive:{})}} onClick={()=>{setLoginType('facility');setError('')}}>Facility</button>
+          <button style={{...p.toggleBtn,...(loginType==='facility'?p.toggleActive:{})}} onClick={()=>{setLoginType('facility');loadFacilities();setError('')}}>Facility</button>
         </div>
 
         {loginType === 'patient' ? (
           <PatientLoginForm onLogin={handlePatientLogin} loading={loading} error={error} />
+        ) : loginType === 'facility' ? (
+          <FacilityLoginForm onLookup={handleCaregiverLogin} loading={loading} error={error} facilities={facilities} />
         ) : (
-          <FacilityLoginForm onLogin={handleFacilityLogin} loading={loading} error={error} />
+          <CaregiverLookupForm facilities={facilities} selectedFacility={selectedFacility} setSelectedFacility={setSelectedFacility} careFirstName={careFirstName} setCareFirstName={setCareFirstName} careLastName={careLastName} setCareLastName={setCareLastName} careDob={careDob} setCareDob={setCareDob} onLookup={handleCaregiverLogin} loading={loading} error={error} />
         )}
-
         <div style={p.hint}>Track your medication deliveries from Clayworth Pharmacy</div>
       </div>
     </div>
@@ -314,15 +323,47 @@ function PatientLoginForm({ onLogin, loading, error }) {
   )
 }
 
-function FacilityLoginForm({ onLogin, loading, error }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+function FacilityLoginForm({ onLookup, loading, error, facilities }) {
+  const [role, setRole] = useState('')
+  const [facilityId, setFacilityId] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [dob, setDob] = useState('')
+  const [nurseAck, setNurseAck] = useState(false)
+
   return (
     <div>
-      <div style={p.field}><label style={p.label}>Email address</label><input style={p.input} type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="facility@email.com" /></div>
-      <div style={p.field}><label style={p.label}>Password</label><input style={p.input} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" /></div>
+      <div style={p.field}>
+        <label style={p.label}>I am a</label>
+        <select style={p.input} value={role} onChange={e=>setRole(e.target.value)}>
+          <option value="">Select role...</option>
+          <option value="nurse">Nurse</option>
+          <option value="caregiver">Caregiver</option>
+          <option value="family">Family Member</option>
+        </select>
+      </div>
+      <div style={p.field}>
+        <label style={p.label}>Facility</label>
+        <select style={p.input} value={facilityId} onChange={e=>setFacilityId(e.target.value)}>
+          <option value="">Select facility...</option>
+          {(facilities||[]).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
+      </div>
+      <div style={p.field}><label style={p.label}>Patient first name</label><input style={p.input} value={firstName} onChange={e=>setFirstName(e.target.value)} placeholder="First name" /></div>
+      <div style={p.field}><label style={p.label}>Patient last name</label><input style={p.input} value={lastName} onChange={e=>setLastName(e.target.value)} placeholder="Last name" /></div>
+      <div style={p.field}><label style={p.label}>Patient date of birth</label><input style={p.input} type="date" value={dob} onChange={e=>setDob(e.target.value)} /></div>
+      {role === 'nurse' && (
+        <div style={{marginBottom:14}}>
+          <label style={{display:'flex', alignItems:'flex-start', gap:8, cursor:'pointer'}}>
+            <input type="checkbox" checked={nurseAck} onChange={e=>setNurseAck(e.target.checked)} style={{marginTop:2}} />
+            <span style={{fontSize:12, color:'#555', lineHeight:1.5}}>I am a licensed healthcare provider authorized to view this patient's medication information</span>
+          </label>
+        </div>
+      )}
       {error && <div style={p.error}>{error}</div>}
-      <button style={p.btn} disabled={loading} onClick={()=>onLogin(email,password)}>{loading?'Signing in...':'View deliveries'}</button>
+      <button style={p.btn} disabled={loading} onClick={()=>onLookup({facilityId, firstName, lastName, dob, role, showMeds: role === 'nurse' && nurseAck})}>
+        {loading ? 'Looking up...' : 'Check delivery status'}
+      </button>
     </div>
   )
 }
@@ -370,4 +411,34 @@ const p = {
   timelineDot:  {width:10,height:10,borderRadius:'50%',flexShrink:0},
   timelineLabel:{fontSize:12,color:'#666'},
   footer:       {textAlign:'center',fontSize:11,color:'#bbb',padding:'20px 0'},
+}
+
+function CaregiverLookupForm({ facilities, selectedFacility, setSelectedFacility, careFirstName, setCareFirstName, careLastName, setCareLastName, careDob, setCareDob, onLookup, loading, error }) {
+  return (
+    <div>
+      <div style={{marginBottom:12}}>
+        <label style={{fontSize:11,fontWeight:600,color:'#666',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:4}}>Facility</label>
+        <select style={{width:'100%',border:'1px solid #ddd',borderRadius:8,padding:'10px 12px',fontSize:14,background:'#f9f9f9',outline:'none'}} value={selectedFacility} onChange={e => setSelectedFacility(e.target.value)}>
+          <option value="">Select facility...</option>
+          {facilities.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
+      </div>
+      <div style={{marginBottom:12}}>
+        <label style={{fontSize:11,fontWeight:600,color:'#666',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:4}}>Patient first name</label>
+        <input style={{width:'100%',border:'1px solid #ddd',borderRadius:8,padding:'10px 12px',fontSize:14,background:'#f9f9f9',outline:'none',boxSizing:'border-box'}} value={careFirstName} onChange={e => setCareFirstName(e.target.value)} placeholder="First name" />
+      </div>
+      <div style={{marginBottom:12}}>
+        <label style={{fontSize:11,fontWeight:600,color:'#666',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:4}}>Patient last name</label>
+        <input style={{width:'100%',border:'1px solid #ddd',borderRadius:8,padding:'10px 12px',fontSize:14,background:'#f9f9f9',outline:'none',boxSizing:'border-box'}} value={careLastName} onChange={e => setCareLastName(e.target.value)} placeholder="Last name" />
+      </div>
+      <div style={{marginBottom:16}}>
+        <label style={{fontSize:11,fontWeight:600,color:'#666',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:4}}>Patient date of birth</label>
+        <input style={{width:'100%',border:'1px solid #ddd',borderRadius:8,padding:'10px 12px',fontSize:14,background:'#f9f9f9',outline:'none',boxSizing:'border-box'}} type="date" value={careDob} onChange={e => setCareDob(e.target.value)} />
+      </div>
+      {error && <div style={{background:'#FCEBEB',color:'#791F1F',padding:'10px 12px',borderRadius:8,fontSize:13,marginBottom:12}}>{error}</div>}
+      <button style={{width:'100%',background:'#1D9E75',color:'#fff',border:'none',borderRadius:8,padding:'12px',fontSize:15,fontWeight:600,cursor:'pointer',opacity:loading?0.6:1}} onClick={onLookup} disabled={loading}>
+        {loading ? 'Looking up...' : 'Check delivery status'}
+      </button>
+    </div>
+  )
 }

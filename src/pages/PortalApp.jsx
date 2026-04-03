@@ -30,7 +30,7 @@ export default function PortalApp() {
   useEffect(() => {
     const t = getToken()
     const u = getUser()
-    if (t && u && u.type !== 'caregiver') { setUserState(u); loadDeliveries(t, u.type === 'facility' ? 'facility' : 'patient'); setScreen('home') }
+    if (t && u && u.type === 'patient') { setUserState(u); loadDeliveries(t, 'patient'); setScreen('home') }
   }, [])
 
   async function loadDeliveries(token, type) {
@@ -179,10 +179,8 @@ export default function PortalApp() {
 
         {loginType === 'patient' ? (
           <PatientLoginForm onLogin={handlePatientLogin} loading={loading} error={error} />
-        ) : loginType === 'facility' ? (
-          <FacilityLoginForm onLookup={handleCaregiverLogin} loading={loading} error={error} facilities={facilities} />
         ) : (
-          <CaregiverLookupForm facilities={facilities} selectedFacility={selectedFacility} setSelectedFacility={setSelectedFacility} careFirstName={careFirstName} setCareFirstName={setCareFirstName} careLastName={careLastName} setCareLastName={setCareLastName} careDob={careDob} setCareDob={setCareDob} onLookup={handleCaregiverLogin} loading={loading} error={error} />
+          <FacilityLoginForm onLookup={handleCaregiverLogin} loading={loading} error={error} facilities={facilities} />
         )}
         <div style={p.hint}>Track your medication deliveries from Clayworth Pharmacy</div>
       </div>

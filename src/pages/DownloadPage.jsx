@@ -1,6 +1,6 @@
 import React from 'react'
 
-const APK_URL = 'https://expo.dev/artifacts/eas/ucMfZZ676p6SBhcpDh5vqz.apk'
+const APK_URL = 'https://expo.dev/artifacts/eas/hJQTNpeN3wARCtSaBKqAQK.apk'
 const IOS_URL = 'https://testflight.apple.com/join/h34Kc8M6'
 
 export default function DownloadPage() {

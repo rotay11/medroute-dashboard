@@ -1,6 +1,6 @@
 import React from 'react'
 
-const APK_URL = 'https://expo.dev/artifacts/eas/hJQTNpeN3wARCtSaBKqAQK.apk'
+const APK_URL = 'https://expo.dev/artifacts/eas/oMGaA1rdxzcRyR3Q4XVzrB.apk'
 const IOS_URL = 'https://testflight.apple.com/join/h34Kc8M6'
 
 export default function DownloadPage() {
@@ -45,7 +45,14 @@ export default function DownloadPage() {
           <div style={styles.step}><span style={styles.stepNum}>4</span><span>Sign in with your credentials</span></div>
         </div>
 
-        <div style={styles.support}>Need help? Contact your dispatcher or administrator.</div>
+        <div style={styles.support}>Need help? Contact your dispatcher or administrator.
+        </div>
+        <div style={{background:'#fff',borderRadius:12,padding:24,textAlign:'center',marginTop:16,border:'1px solid #e0e0e0'}}>
+          <div style={{fontSize:14,fontWeight:600,color:'#333',marginBottom:8}}>Scan to download</div>
+          <div style={{fontSize:12,color:'#888',marginBottom:16}}>Point your phone camera at this QR code</div>
+          <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent('https://medroute-dashboard.vercel.app/download')} alt="QR Code" style={{width:180,height:180,borderRadius:8}} />
+          <div style={{fontSize:11,color:'#aaa',marginTop:8}}>medroute-dashboard.vercel.app/download</div>
+        </div>
       </div>
     </div>
   )

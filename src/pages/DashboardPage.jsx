@@ -562,6 +562,76 @@ function EditStaffModal({ staff, onClose, onSave, token }) {
 }
 
 
+function ChangePasswordModal({ onClose, token }) {
+  const [current, setCurrent] = React.useState('')
+  const [newPwd, setNewPwd] = React.useState('')
+  const [confirm, setConfirm] = React.useState('')
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState('')
+  const [success, setSuccess] = React.useState(false)
+  const API = 'https://cozy-upliftment-production-7486.up.railway.app'
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (newPwd !== confirm) { setError('New passwords do not match'); return }
+    if (newPwd.length < 8) { setError('New password must be at least 8 characters'); return }
+    setLoading(true); setError('')
+    try {
+      await axios.post(API + '/api/auth/change-password', { currentPassword: current, newPassword: newPwd }, {
+        headers: { Authorization: 'Bearer ' + token }
+      })
+      setSuccess(true)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not change password')
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div style={mStyles.overlay} onClick={onClose}>
+      <div style={mStyles.modal} onClick={e => e.stopPropagation()}>
+        <div style={mStyles.header}>
+          <div style={mStyles.title}>Change password</div>
+          <button style={mStyles.closeBtn} onClick={onClose}>x</button>
+        </div>
+        {success ? (
+          <div style={mStyles.body}>
+            <div style={mStyles.successBox}>
+              <div style={mStyles.successTitle}>Password changed successfully</div>
+            </div>
+            <div style={mStyles.footer}>
+              <button style={mStyles.primaryBtn} onClick={onClose}>Done</button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div style={mStyles.body}>
+              <div style={mStyles.field}>
+                <label style={mStyles.label}>Current password</label>
+                <input style={mStyles.input} type="password" value={current} onChange={e=>setCurrent(e.target.value)} required />
+              </div>
+              <div style={mStyles.field}>
+                <label style={mStyles.label}>New password</label>
+                <input style={mStyles.input} type="password" value={newPwd} onChange={e=>setNewPwd(e.target.value)} placeholder="At least 8 characters" required />
+              </div>
+              <div style={mStyles.field}>
+                <label style={mStyles.label}>Confirm new password</label>
+                <input style={mStyles.input} type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} required />
+              </div>
+              {error && <div style={mStyles.error}>{error}</div>}
+            </div>
+            <div style={mStyles.footer}>
+              <button type="button" style={mStyles.secondaryBtn} onClick={onClose}>Cancel</button>
+              <button type="submit" style={mStyles.primaryBtn} disabled={loading}>{loading ? 'Saving...' : 'Change password'}</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+
 function EditPatientModal({ patient, onClose, onSave, token }) {
   const [form, setForm] = React.useState({
     firstName: patient.firstName || '',
@@ -701,6 +771,7 @@ export default function DashboardPage({ user, onLogout }) {
   const [editFacility,   setEditFacility]   = useState(null)
   const [editStaff,      setEditStaff]      = useState(null)
   const [delayPackage,   setDelayPackage]   = useState(null)
+  const [showChangePwd,  setShowChangePwd]  = useState(false)
   const socketRef = useRef(null)
 
   useEffect(() => {
@@ -804,6 +875,7 @@ export default function DashboardPage({ user, onLogout }) {
         </div>
         <div style={styles.tbRight}>
           <span style={styles.tbUser}>{user.firstName} {user.lastName} · {user.role}</span>
+          <button style={{...styles.logoutBtn, marginRight:8, background:'rgba(255,255,255,0.15)'}} onClick={() => setShowChangePwd(true)}>🔑 Change password</button>
           <button style={styles.logoutBtn} onClick={onLogout}>Sign out</button>
         </div>
       </div>
@@ -1011,6 +1083,9 @@ export default function DashboardPage({ user, onLogout }) {
         </div>
       )}
 
+      {showChangePwd && (
+        <ChangePasswordModal onClose={() => setShowChangePwd(false)} token={getToken()} />
+      )}
       {delayPackage && (
         <DelayNotificationModal pkg={delayPackage} onClose={() => setDelayPackage(null)} onSave={loadPackages} token={getToken()} />
       )}

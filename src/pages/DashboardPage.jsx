@@ -946,6 +946,17 @@ export default function DashboardPage({ user, onLogout }) {
                         <div style={{display:'flex',gap:4}}>
                           <button style={styles.actionBtn} onClick={() => setSelectedDriver(driver)}>View</button>
                           <button style={{...styles.actionBtn,color:'#0C447C',borderColor:'#0C447C'}} onClick={() => setEditStaff(driver)}>Edit</button>
+                          <button style={{...styles.actionBtn,color:'#BA7517',borderColor:'#BA7517'}} onClick={async () => {
+                            if (!window.confirm('Clear all undelivered stops for ' + driver.firstName + ' ' + driver.lastName + '?')) return
+                            try {
+                              await axios.post(API + '/api/dispatch/drivers/' + driver.id + '/clear-route', {}, { headers: { Authorization: 'Bearer ' + getToken() } })
+                              alert('Route cleared successfully')
+                              loadDrivers()
+                              loadPackages()
+                            } catch (err) {
+                              alert('Could not clear route')
+                            }
+                          }}>Clear Route</button>
                           <button style={{...styles.actionBtn,color:driver.status==='SUSPENDED'?'#1D9E75':'#E24B4A',borderColor:driver.status==='SUSPENDED'?'#1D9E75':'#E24B4A'}} onClick={() => handleSuspend(driver)}>{driver.status==='SUSPENDED'?'Restore':'Suspend'}</button>
                         </div>
                       </td>

@@ -988,7 +988,18 @@ export default function DashboardPage({ user, onLogout }) {
                     <td style={styles.td}><span style={{...styles.pill,...(patient.language==='ES'?styles.pillES:styles.pillEN)}}>{patient.language}</span></td>
                     <td style={styles.td}>{patient._count?.packages || 0}</td>
                     <td style={styles.td}><a href={'/portal'} target="_blank" style={styles.mapLink}>Portal</a></td>
-                    <td style={styles.td}><button style={styles.actionBtn} onClick={() => setEditPatient(patient)}>Edit</button></td>
+                    <td style={styles.td}>
+                      <button style={styles.actionBtn} onClick={() => setEditPatient(patient)}>Edit</button>
+                      <button style={{...styles.actionBtn, color:'#c0392b', borderColor:'#c0392b', marginLeft:4}} onClick={async () => {
+                        if (!window.confirm('Delete patient ' + patient.firstName + ' ' + patient.lastName + '? This will also delete all their deliveries.')) return
+                        try {
+                          await axios.delete(API + '/api/admin/patients/' + patient.id, { headers: { Authorization: 'Bearer ' + getToken() } })
+                          loadPatients()
+                        } catch (err) {
+                          alert('Could not delete patient')
+                        }
+                      }}>Delete</button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

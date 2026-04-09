@@ -16,6 +16,7 @@ export default function PortalApp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loginType, setLoginType] = useState('patient')
+  const [pharmacy, setPharmacy] = useState({ name: '{pharmacy.name}', phone: '{pharmacy.phone}' })
   const [facilities, setFacilities] = useState([])
   const [caregiverData, setCaregiverData] = useState(null)
   const [selectedFacility, setSelectedFacility] = useState('')
@@ -26,6 +27,11 @@ export default function PortalApp() {
   const [messages, setMessages] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+
+  useEffect(() => {
+    fetch('https://cozy-upliftment-production-7486.up.railway.app/api/auth/pharmacy')
+      .then(r => r.json()).then(d => { if (d.pharmacy) setPharmacy(d.pharmacy) }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const t = getToken()
@@ -90,7 +96,7 @@ export default function PortalApp() {
       const res = await axios.post(API + '/api/portal/patient/' + token + '/chat', { message: userMsg })
       setMessages(prev => [...prev, { role: 'agent', text: res.data.reply }])
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'agent', text: 'Sorry I could not process your question. Please contact Clayworth Pharmacy at (510) 537-9402.' }])
+      setMessages(prev => [...prev, { role: 'agent', text: 'Sorry I could not process your question. Please contact {pharmacy.name} at {pharmacy.phone}.' }])
     }
     setChatLoading(false)
   }
@@ -122,7 +128,7 @@ export default function PortalApp() {
     <div style={p.container}>
       <div style={p.header}>
         <div style={p.logo}>💊</div>
-        <div style={p.brand}>MedRoute</div>
+        <div style={p.brand}>MedRouteRx</div>
         <div style={p.tagline}>Delivery Status</div>
       </div>
       <div style={p.card}>
@@ -154,8 +160,8 @@ export default function PortalApp() {
           )}
         </div>
         <div style={{background:'#FFF8EC', borderRadius:10, padding:14, marginBottom:16, borderLeft:'3px solid #BA7517'}}>
-          <div style={{fontSize:12, color:'#633806'}}>For more information contact Clayworth Pharmacy</div>
-          <div style={{fontSize:14, fontWeight:600, color:'#633806', marginTop:4}}>(510) 537-9402</div>
+          <div style={{fontSize:12, color:'#633806'}}>For more information contact {pharmacy.name}</div>
+          <div style={{fontSize:14, fontWeight:600, color:'#633806', marginTop:4}}>{pharmacy.phone}</div>
         </div>
         <button onClick={() => { setScreen('login'); setCaregiverData(null) }} style={{...p.btn, background:'#888'}}>Check another patient</button>
       </div>
@@ -167,22 +173,17 @@ export default function PortalApp() {
         <div style={p.logo}>
           <div style={p.logoIcon}>M</div>
           <div>
-            <div style={p.logoTitle}>MedRoute</div>
+            <div style={p.logoTitle}>MedRouteRx</div>
             <div style={p.logoSub}>Delivery Tracking Portal</div>
           </div>
         </div>
 
         <div style={p.toggleRow}>
           <button style={{...p.toggleBtn,...(loginType==='patient'?p.toggleActive:{})}} onClick={()=>{setLoginType('patient');setError('')}}>Patient</button>
-          <button style={{...p.toggleBtn,...(loginType==='facility'?p.toggleActive:{})}} onClick={()=>{setLoginType('facility');loadFacilities();setError('')}}>Facility</button>
         </div>
 
-        {loginType === 'patient' ? (
-          <PatientLoginForm onLogin={handlePatientLogin} loading={loading} error={error} />
-        ) : (
-          <FacilityLoginForm onLookup={handleCaregiverLogin} loading={loading} error={error} facilities={facilities} />
-        )}
-        <div style={p.hint}>Track your medication deliveries from Clayworth Pharmacy</div>
+        <PatientLoginForm onLogin={handlePatientLogin} loading={loading} error={error} />
+        <div style={p.hint}>Track your medication deliveries from {pharmacy.name}</div>
       </div>
     </div>
   )
@@ -241,7 +242,7 @@ export default function PortalApp() {
             )}
 
             {delivery.status === 'PENDING' && (
-              <div style={p.pendingMsg}>Being prepared at Clayworth Pharmacy</div>
+              <div style={p.pendingMsg}>Being prepared at {pharmacy.name}</div>
             )}
 
             <div style={p.timeline}>
@@ -266,7 +267,7 @@ export default function PortalApp() {
             <div style={{width:32, height:32, background:'rgba(255,255,255,0.2)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16}}>💊</div>
             <div>
               <div style={{color:'#fff', fontWeight:600, fontSize:14}}>MedRouteRx Assistant</div>
-              <div style={{color:'rgba(255,255,255,0.75)', fontSize:11}}>Clayworth Pharmacy</div>
+              <div style={{color:'rgba(255,255,255,0.75)', fontSize:11}}>{pharmacy.name}</div>
             </div>
           </div>
           <div style={{flex:1, overflowY:'auto', padding:12, display:'flex', flexDirection:'column', gap:8, minHeight:200, maxHeight:280}}>
@@ -301,7 +302,7 @@ export default function PortalApp() {
         </div>
       )}
       <div style={p.footer}>
-          Powered by Clayworth Pharmacy · MedRoute
+          Powered by {pharmacy.name} · MedRouteRx
         </div>
       </div>
     </div>

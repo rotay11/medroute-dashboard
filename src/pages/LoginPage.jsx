@@ -34,7 +34,7 @@ export default function LoginPage({ onLogin }) {
         <div style={styles.logo}>
           <div style={styles.logoIcon}>M</div>
           <div>
-            <div style={styles.logoTitle}>MedRoute</div>
+            <div style={styles.logoTitle}>MedRouteRx</div>
             <div style={styles.logoSub}>Dispatcher Dashboard</div>
           </div>
         </div>

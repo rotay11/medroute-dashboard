@@ -5,6 +5,7 @@ const API = 'https://cozy-upliftment-production-7486.up.railway.app'
 
 export default function FacilityPortal() {
   const [step, setStep] = useState('login')
+  const [pharmacy, setPharmacy] = useState({ name: pharmacy.name, phone: pharmacy.phone })
   const [facilities, setFacilities] = useState([])
   const [form, setForm] = useState({ facilityId: '', role: '', firstName: '', lastName: '', dob: '' })
   const [nurseAck, setNurseAck] = useState(false)
@@ -13,6 +14,7 @@ export default function FacilityPortal() {
   const [result, setResult] = useState(null)
 
   useEffect(() => {
+    axios.get(API + '/api/auth/pharmacy').then(r => { if (r.data.pharmacy) setPharmacy(r.data.pharmacy) }).catch(() => {})
     axios.get(API + '/api/portal/facilities')
       .then(r => setFacilities(r.data.facilities || []))
       .catch(() => {})

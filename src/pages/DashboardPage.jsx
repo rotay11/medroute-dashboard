@@ -869,7 +869,7 @@ export default function DashboardPage({ user, onLogout }) {
       <div style={styles.topbar}>
         <div style={styles.tbLeft}>
           <div style={styles.tbLogo}>M</div>
-          <span style={styles.tbBrand}>MedRoute Dispatcher</span>
+          <span style={styles.tbBrand}>MedRouteRx Dispatcher</span>
           <div style={styles.liveDot} />
           <span style={styles.liveText}>Live</span>
         </div>

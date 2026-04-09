@@ -265,7 +265,7 @@ export default function PortalApp() {
           <div style={{background:'#1D9E75', padding:'12px 16px', borderRadius:'16px 16px 0 0', display:'flex', alignItems:'center', gap:8}}>
             <div style={{width:32, height:32, background:'rgba(255,255,255,0.2)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16}}>💊</div>
             <div>
-              <div style={{color:'#fff', fontWeight:600, fontSize:14}}>MedRoute Assistant</div>
+              <div style={{color:'#fff', fontWeight:600, fontSize:14}}>MedRouteRx Assistant</div>
               <div style={{color:'rgba(255,255,255,0.75)', fontSize:11}}>Clayworth Pharmacy</div>
             </div>
           </div>

@@ -10,7 +10,7 @@ export default function DownloadPage() {
         <div style={styles.logo}>
           <div style={styles.logoIcon}>M</div>
           <div>
-            <div style={styles.logoTitle}>MedRoute Driver</div>
+            <div style={styles.logoTitle}>MedRouteRx Driver</div>
             <div style={styles.logoSub}>Clayworth Pharmacy</div>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default function DownloadPage() {
           <div style={styles.step}><span style={styles.stepNum}>1</span><span>Tap Download APK above</span></div>
           <div style={styles.step}><span style={styles.stepNum}>2</span><span>Open your Downloads folder and tap the file</span></div>
           <div style={styles.step}><span style={styles.stepNum}>3</span><span>If prompted allow installation from unknown sources</span></div>
-          <div style={styles.step}><span style={styles.stepNum}>4</span><span>Open MedRoute Driver and sign in with your credentials</span></div>
+          <div style={styles.step}><span style={styles.stepNum}>4</span><span>Open MedRouteRx Driver and sign in with your credentials</span></div>
         </div>
         <div style={styles.platformCard}>
           <div style={{width:36,height:36,borderRadius:8,background:'#E8E8ED',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:'bold',color:'#333',flexShrink:0}}>i</div>
@@ -41,7 +41,7 @@ export default function DownloadPage() {
           <a href={IOS_URL} style={{...styles.downloadBtn,background:'#333'}}>Join TestFlight Beta</a>
           <div style={styles.step}><span style={styles.stepNum}>1</span><span>Install TestFlight from the App Store (free)</span></div>
           <div style={styles.step}><span style={styles.stepNum}>2</span><span>Tap Join TestFlight Beta above</span></div>
-          <div style={styles.step}><span style={styles.stepNum}>3</span><span>Open TestFlight and install MedRoute Driver</span></div>
+          <div style={styles.step}><span style={styles.stepNum}>3</span><span>Open TestFlight and install MedRouteRx Driver</span></div>
           <div style={styles.step}><span style={styles.stepNum}>4</span><span>Sign in with your credentials</span></div>
         </div>
 

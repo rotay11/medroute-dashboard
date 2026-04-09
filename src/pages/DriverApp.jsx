@@ -227,7 +227,7 @@ function LoginScreen({ onLogin, loading, error }) {
   return (
     <div style={s.loginPage}>
       <div style={s.loginCard}>
-        <div style={s.loginLogo}><div style={s.loginLogoIcon}>M</div><div><div style={s.loginTitle}>MedRoute Driver</div><div style={s.loginSub}>Clayworth Pharmacy</div></div></div>
+        <div style={s.loginLogo}><div style={s.loginLogoIcon}>M</div><div><div style={s.loginTitle}>MedRouteRx Driver</div><div style={s.loginSub}>Clayworth Pharmacy</div></div></div>
         <div style={s.loginField}><label style={s.loginLabel}>Email</label><input style={s.loginInput} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" /></div>
         <div style={s.loginField}><label style={s.loginLabel}>Password</label><input style={s.loginInput} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" /></div>
         {error && <div style={s.loginError}>{error}</div>}

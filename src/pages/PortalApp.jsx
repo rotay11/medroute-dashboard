@@ -24,6 +24,9 @@ export default function PortalApp() {
   const [careLastName, setCareLastName] = useState('')
   const [careDob, setCareDob] = useState('')
   const [showChat, setShowChat] = useState(false)
+  const mapRef = React.useRef(null)
+  const leafletMap = React.useRef(null)
+  const driverMarker = React.useRef(null)
   const [messages, setMessages] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
@@ -84,6 +87,51 @@ export default function PortalApp() {
   function handleLogout() {
     clearToken(); setUserState(null); setDeliveries([]); setScreen('login')
   }
+
+  // Initialize tracking map when deliveries load
+  React.useEffect(() => {
+    const activeDelivery = deliveries.find(d => d.bundle?.status === 'IN_TRANSIT')
+    if (!activeDelivery || !mapRef.current) return
+    
+    function initMap() {
+      if (!window.L) { setTimeout(initMap, 300); return }
+      if (leafletMap.current) return
+      
+      const driverLoc = activeDelivery.location
+      const center = driverLoc ? [driverLoc.lat, driverLoc.lng] : [37.6879, -122.0561]
+      
+      leafletMap.current = window.L.map(mapRef.current).setView(center, 13)
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(leafletMap.current)
+      
+      if (driverLoc) {
+        driverMarker.current = window.L.marker([driverLoc.lat, driverLoc.lng])
+          .addTo(leafletMap.current)
+          .bindPopup('Your driver is here')
+          .openPopup()
+      }
+    }
+    
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link')
+      link.id = 'leaflet-css'
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      document.head.appendChild(link)
+    }
+    
+    if (!window.L) {
+      const script = document.createElement('script')
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+      script.onload = initMap
+      document.head.appendChild(script)
+    } else {
+      initMap()
+    }
+    
+    return () => {
+      if (leafletMap.current) { leafletMap.current.remove(); leafletMap.current = null }
+    }
+  }, [deliveries])
 
   async function sendMessage() {
     if (!chatInput.trim() || chatLoading) return
@@ -271,6 +319,12 @@ export default function PortalApp() {
             </div>
           </div>
           <div style={{flex:1, overflowY:'auto', padding:12, display:'flex', flexDirection:'column', gap:8, minHeight:200, maxHeight:280}}>
+            {deliveries.find(d => d.bundle?.status === 'IN_TRANSIT') && (
+              <div style={{marginBottom:16,borderRadius:10,overflow:'hidden',border:'1px solid #e0e0e0'}}>
+                <div style={{background:'#1D9E75',padding:'8px 12px',color:'#fff',fontSize:13,fontWeight:600}}>Live driver location</div>
+                <div ref={mapRef} style={{height:200,width:'100%'}}></div>
+              </div>
+            )}
             {messages.map((msg, i) => (
               <div key={i} style={{display:'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'}}>
                 <div style={{

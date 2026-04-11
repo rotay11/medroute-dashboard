@@ -37,7 +37,7 @@ function LiveMap({ drivers, liveLocations }) {
         iconSize: [16, 16], iconAnchor: [8, 8],
       })
       window.L.marker([37.6879, -122.0561], { icon }).addTo(map)
-        .bindPopup('<b>' + pharmacy.name + '</b><br>' + pharmacy.address)
+        .bindPopup('<b>Clayworth Pharmacy</b><br>20353 Lake Chabot Rd, Castro Valley CA')
     }
 
     if (!document.getElementById('leaflet-js')) {
@@ -88,7 +88,7 @@ function LiveMap({ drivers, liveLocations }) {
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#BA7517' }} /><span>At pharmacy / idle</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1D9E75', border: '2px solid white' }} /><span>{pharmacy.name}</span>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1D9E75', border: '2px solid white' }} /><span>Clayworth Pharmacy</span>
         </div>
       </div>
     </div>
@@ -756,7 +756,6 @@ function pkgStatusStyle(status) {
 
 export default function DashboardPage({ user, onLogout }) {
   const [drivers,        setDrivers]        = useState([])
-  const [pharmacy,       setPharmacy]       = useState({ name: 'Clayworth Pharmacy', address: '20353 Lake Chabot Rd, Castro Valley CA', phone: '(510) 537-9402' })
   const [packages,       setPackages]       = useState([])
   const [alerts,         setAlerts]         = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
@@ -778,7 +777,6 @@ export default function DashboardPage({ user, onLogout }) {
   useEffect(() => {
     loadDrivers()
     loadPackages()
-    axios.get(API + '/api/auth/pharmacy').then(r => { if (r.data.pharmacy) setPharmacy(r.data.pharmacy) }).catch(() => {})
     loadAlerts()
     loadPatients()
     loadFacilities()

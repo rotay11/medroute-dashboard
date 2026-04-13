@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 
 export default function LandingPage() {
-  const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({ pharmacyName: '', contactName: '', email: '', phone: '', drivers: '', licenseNumber: '', licenseState: '' })
+  function updateForm(f, v) { setForm(prev => ({ ...prev, [f]: v })) }
 
   function handleSubmit(e) {
     e.preventDefault()
-    if (email) setSubmitted(true)
+    if (form.email && form.pharmacyName && form.licenseNumber) setSubmitted(true)
   }
 
   return (
@@ -225,18 +226,29 @@ export default function LandingPage() {
               <div style={{ fontSize: 14, marginTop: 8, opacity: 0.85 }}>We will be in touch within one business day.</div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 12, maxWidth: 480, margin: '0 auto', flexWrap: 'wrap' }}>
-              <input
-                type="email"
-                placeholder="Enter your pharmacy email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                style={{ flex: 1, minWidth: 200, padding: '14px 18px', borderRadius: 10, border: 'none', fontSize: 15, outline: 'none' }}
-              />
-              <button type="submit" style={{ background: '#0C447C', color: '#fff', padding: '14px 28px', borderRadius: 10, border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Get Started Free
+            <form onSubmit={handleSubmit} style={{ maxWidth: 520, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="text" placeholder="Pharmacy name *" value={form.pharmacyName} onChange={e => updateForm('pharmacyName', e.target.value)} required style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+                <input type="text" placeholder="Your name *" value={form.contactName} onChange={e => updateForm('contactName', e.target.value)} required style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="email" placeholder="Email address *" value={form.email} onChange={e => updateForm('email', e.target.value)} required style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+                <input type="tel" placeholder="Phone number" value={form.phone} onChange={e => updateForm('phone', e.target.value)} style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="text" placeholder="Pharmacy license number *" value={form.licenseNumber} onChange={e => updateForm('licenseNumber', e.target.value)} required style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+                <input type="text" placeholder="License state (e.g. CA)" value={form.licenseState} onChange={e => updateForm('licenseState', e.target.value)} style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none' }} />
+              </div>
+              <select value={form.drivers} onChange={e => updateForm('drivers', e.target.value)} style={{ padding: '12px 16px', borderRadius: 10, border: 'none', fontSize: 14, outline: 'none', color: form.drivers ? '#333' : '#888' }}>
+                <option value="">Number of delivery drivers</option>
+                <option value="1-3">1-3 drivers (Basic plan)</option>
+                <option value="4-8">4-8 drivers (Professional plan)</option>
+                <option value="9+">9+ drivers (Enterprise plan)</option>
+              </select>
+              <button type="submit" style={{ background: '#0C447C', color: '#fff', padding: '14px 28px', borderRadius: 10, border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                Request Free Demo
               </button>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: 0 }}>* Required fields. License number used for verification purposes only.</p>
             </form>
           )}
           <p style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>No credit card required. 30-day free trial. Cancel anytime.</p>

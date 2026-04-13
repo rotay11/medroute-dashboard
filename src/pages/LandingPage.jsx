@@ -41,13 +41,13 @@ export default function LandingPage() {
         </p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="#contact" style={{ background: '#1D9E75', color: '#fff', padding: '16px 36px', borderRadius: 12, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(29,158,117,0.3)' }}>
-            Start Free Trial
+            Request a Demo
           </a>
           <a href="#how-it-works" style={{ background: '#fff', color: '#1D9E75', padding: '16px 36px', borderRadius: 12, fontSize: 16, fontWeight: 700, textDecoration: 'none', border: '2px solid #1D9E75' }}>
             See How It Works
           </a>
         </div>
-        <p style={{ marginTop: 20, fontSize: 13, color: '#888' }}>No credit card required · 30-day free trial · Cancel anytime</p>
+        <p style={{ marginTop: 20, fontSize: 13, color: '#888' }}>Licensed pharmacies only · Demo available by appointment</p>
       </section>
 
       {/* Stats Bar */}
@@ -191,7 +191,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <a href="#contact" style={{ display: 'block', textAlign: 'center', background: p.color, color: '#fff', padding: '12px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
-                  Start Free Trial
+                  Request a Demo
                 </a>
               </div>
             ))}
@@ -215,15 +215,15 @@ export default function LandingPage() {
       {/* Contact / CTA */}
       <section id="contact" style={{ padding: '80px 40px', background: '#1D9E75' }}>
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16 }}>Ready to Transform Your Delivery Operation?</h2>
+          <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16 }}>Ready to See MedRouteRx in Action?</h2>
           <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.85)', marginBottom: 40, lineHeight: 1.6 }}>
-            Join independent pharmacies using MedRouteRx to deliver smarter. Start your 30-day free trial today.
+            Schedule a personalized demo and see how MedRouteRx can transform your pharmacy delivery operation.
           </p>
           {submitted ? (
             <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 12, padding: 24, color: '#fff' }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
               <div style={{ fontSize: 18, fontWeight: 700 }}>Thank you!</div>
-              <div style={{ fontSize: 14, marginTop: 8, opacity: 0.85 }}>We will be in touch within one business day.</div>
+              <div style={{ fontSize: 14, marginTop: 8, opacity: 0.85 }}>We will contact you within one business day to schedule your demo.</div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ maxWidth: 520, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -251,7 +251,7 @@ export default function LandingPage() {
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: 0 }}>* Required fields. License number used for verification purposes only.</p>
             </form>
           )}
-          <p style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>No credit card required. 30-day free trial. Cancel anytime.</p>
+          <p style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Licensed pharmacies only. Demo available by appointment.</p>
         </div>
       </section>
 

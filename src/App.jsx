@@ -5,6 +5,7 @@ import DriverApp from './pages/DriverApp'
 import PortalApp from './pages/PortalApp'
 import LandingPage from './pages/LandingPage'
 import SuperAdminPage from './pages/SuperAdminPage'
+import RegisterPage from './pages/RegisterPage'
 import FacilityPortal from './pages/FacilityPortal'
 import DashboardPage from './pages/DashboardPage'
 
@@ -32,6 +33,7 @@ export default function App() {
   if (window.location.pathname === '/portal') return <PortalApp />
   if (window.location.pathname === '/landing') return <LandingPage />
   if (window.location.pathname === '/superadmin') return <SuperAdminPage />
+  if (window.location.pathname === '/register') return <RegisterPage />
   if (window.location.pathname === '/facility') return <FacilityPortal />
   if (!user) return <LoginPage onLogin={handleLogin} />
   return <DashboardPage user={user} onLogout={handleLogout} />

@@ -7,7 +7,7 @@ export default function FacilityPortal() {
   const [step, setStep] = useState('login')
   const [pharmacy, setPharmacy] = useState({ name: 'Clayworth Pharmacy', phone: '(510) 537-9402' })
   const [facilities, setFacilities] = useState([])
-  const [form, setForm] = useState({ facilityId: '', role: '', firstName: '', lastName: '', dob: '' })
+  const [form, setForm] = useState({ facilityId: '', role: '', firstName: '', lastName: '', pin: '' })
   const [nurseAck, setNurseAck] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -23,7 +23,7 @@ export default function FacilityPortal() {
   function update(f, v) { setForm(prev => ({ ...prev, [f]: v })) }
 
   async function handleLookup() {
-    if (!form.facilityId || !form.role || !form.firstName || !form.lastName || !form.dob) {
+    if (!form.facilityId || !form.role || !form.firstName || !form.lastName || !form.pin) {
       setError('All fields are required'); return
     }
     setLoading(true); setError('')
@@ -32,7 +32,7 @@ export default function FacilityPortal() {
         facilityId: form.facilityId,
         firstName: form.firstName,
         lastName: form.lastName,
-        dob: form.dob,
+        pin: form.pin,
         role: form.role,
         showMeds: form.role === 'nurse' && nurseAck
       })
@@ -95,7 +95,7 @@ export default function FacilityPortal() {
             <div style={{ fontSize: 12, color: '#633806' }}>For more information contact Clayworth Pharmacy</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#633806', marginTop: 4 }}>(510) 537-9402</div>
           </div>
-          <button style={s.backBtn} onClick={() => { setStep('login'); setResult(null); setForm({ facilityId: '', role: '', firstName: '', lastName: '', dob: '' }); setNurseAck(false) }}>
+          <button style={s.backBtn} onClick={() => { setStep('login'); setResult(null); setForm({ facilityId: '', role: '', firstName: '', lastName: '', pin: '' }); setNurseAck(false) }}>
             Check another patient
           </button>
         </div>
@@ -136,8 +136,8 @@ export default function FacilityPortal() {
           <input style={s.input} value={form.lastName} onChange={e => update('lastName', e.target.value)} placeholder="Last name" />
         </div>
         <div style={s.field}>
-          <label style={s.label}>Patient date of birth</label>
-          <input style={s.input} type="date" value={form.dob} onChange={e => update('dob', e.target.value)} />
+          <label style={s.label}>Facility PIN</label>
+          <input style={s.input} type="tel" maxLength={6} value={form.pin} onChange={e => update('pin', e.target.value.replace(/\D/g,'').slice(0,6))} placeholder="6-digit PIN" />
         </div>
         {form.role === 'nurse' && (
           <div style={{ marginBottom: 14 }}>

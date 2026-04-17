@@ -769,6 +769,7 @@ export default function DashboardPage({ user, onLogout }) {
   const [showAddFacility,setShowAddFacility]= useState(false)
   const [editPatient,    setEditPatient]    = useState(null)
   const [editFacility,   setEditFacility]   = useState(null)
+  const [showPins,       setShowPins]       = useState({})
   const [editStaff,      setEditStaff]      = useState(null)
   const [delayPackage,   setDelayPackage]   = useState(null)
   const [showChangePwd,  setShowChangePwd]  = useState(false)
@@ -808,6 +809,19 @@ export default function DashboardPage({ user, onLogout }) {
       const { data } = await axios.get(API + '/api/dispatch/packages', { headers: { Authorization: 'Bearer ' + getToken() } })
       setPackages(data.packages || [])
     } catch {}
+  }
+
+  async function resetFacilityPin(facilityId, facilityName) {
+    if (!window.confirm('Reset PIN for ' + facilityName + '?')) return
+    try {
+      const res = await axios.post(API + '/api/admin/facilities/' + facilityId + '/reset-pin', {}, {
+        headers: { Authorization: 'Bearer ' + token }
+      })
+      alert(facilityName + ' new PIN: ' + res.data.accessPin)
+      loadFacilities()
+    } catch (err) {
+      alert('Could not reset PIN')
+    }
   }
 
   async function printBagSlip(bundleId, patientName) {
@@ -1057,9 +1071,19 @@ export default function DashboardPage({ user, onLogout }) {
                     <td style={styles.td}><div style={styles.driverName}>{facility.name}</div></td>
                     <td style={styles.td}>{facility.email}</td>
                     <td style={styles.td}>{facility.phone || '—'}</td>
-                    <td style={styles.td}>{facility.contactPerson || '—'}</td>
+                    <td style={styles.td}>
+                      <div style={{display:'flex',alignItems:'center',gap:6}}>
+                        <span style={{fontFamily:'monospace',fontSize:13,fontWeight:600,color:'#1D9E75'}}>
+                          {showPins[facility.id] ? (facility.accessPin || '------') : '••••••'}
+                        </span>
+                        <button style={{...styles.actionBtn,background:'#888',fontSize:11,padding:'2px 8px'}}
+                          onClick={() => setShowPins(prev => ({...prev, [facility.id]: !prev[facility.id]}))}>
+                          {showPins[facility.id] ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                    </td>
                     <td style={styles.td}>{facility._count?.packages || 0}</td>
-                    <td style={styles.td}><button style={styles.actionBtn} onClick={() => setEditFacility(facility)}>Edit</button></td>
+                    <td style={styles.td}><button style={styles.actionBtn} onClick={() => setEditFacility(facility)}>Edit</button><button style={{...styles.actionBtn, background:'#BA7517', marginLeft:4}} onClick={() => resetFacilityPin(facility.id, facility.name)}>Reset PIN</button></td>
                   </tr>
                 ))}
               </tbody>

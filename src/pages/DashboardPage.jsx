@@ -1062,7 +1062,7 @@ export default function DashboardPage({ user, onLogout }) {
             </div>
             <table style={styles.table}>
               <thead>
-                <tr>{['Facility name','Email','Phone','Contact','Packages'].map(h => <th key={h} style={styles.th}>{h}</th>)}</tr>
+                <tr>{['Facility name','Email','Phone','Access PIN','Packages','Actions'].map(h => <th key={h} style={styles.th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {facilities.length === 0 && <tr><td colSpan={5} style={styles.empty}>No facilities found</td></tr>}

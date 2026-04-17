@@ -16,6 +16,26 @@ export default function PortalApp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loginType, setLoginType] = useState('patient')
+
+  // Auto-login from URL token parameter
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const urlToken = params.get('token')
+    if (urlToken) {
+      setToken(urlToken)
+      axios.get(API + '/api/portal/patient/' + urlToken + '/packages')
+        .then(res => {
+          const patient = res.data.patient
+          localStorage.setItem('portal_user', JSON.stringify({ firstName: patient.firstName, portalToken: urlToken }))
+          setUserState({ firstName: patient.firstName, portalToken: urlToken })
+          setDeliveries(res.data.packages || [])
+          setScreen('patient')
+        })
+        .catch(() => {
+          clearToken()
+        })
+    }
+  }, [])
   const [pharmacy, setPharmacy] = useState({ name: '{pharmacy.name}', phone: '{pharmacy.phone}' })
   const [facilities, setFacilities] = useState([])
   const [caregiverData, setCaregiverData] = useState(null)
@@ -51,17 +71,17 @@ export default function PortalApp() {
     } catch {}
   }
 
-  async function handlePatientLogin(email, dob) {
+  async function handlePatientLogin(firstName, lastName, phoneLast4) {
     setLoading(true); setError('')
     try {
-      const { data } = await axios.post(API + '/api/portal/patient/login', { email, dob })
+      const { data } = await axios.post(API + '/api/portal/patient/login', { firstName, lastName, phoneLast4 })
       setToken(data.patient.portalToken)
       setUser(data.patient)
       setUserState(data.patient)
       await loadDeliveries(data.patient.portalToken, 'patient')
       setScreen('home')
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your email and date of birth.')
+      setError(err.response?.data?.error || 'Login failed. Please check your name and phone number.')
     }
     setLoading(false)
   }
@@ -310,14 +330,18 @@ export default function PortalApp() {
 }
 
 function PatientLoginForm({ onLogin, loading, error }) {
-  const [email, setEmail] = useState('')
-  const [dob, setDob] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phoneLast4, setPhoneLast4] = useState('')
   return (
     <div>
-      <div style={p.field}><label style={p.label}>Email address</label><input style={p.input} type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com" /></div>
-      <div style={p.field}><label style={p.label}>Date of birth</label><input style={p.input} type="date" value={dob} onChange={e=>setDob(e.target.value)} /></div>
+      <div style={{display:'flex',gap:8}}>
+        <div style={{...p.field,flex:1}}><label style={p.label}>First name</label><input style={p.input} type="text" value={firstName} onChange={e=>setFirstName(e.target.value)} placeholder="First name" /></div>
+        <div style={{...p.field,flex:1}}><label style={p.label}>Last name</label><input style={p.input} type="text" value={lastName} onChange={e=>setLastName(e.target.value)} placeholder="Last name" /></div>
+      </div>
+      <div style={p.field}><label style={p.label}>Last 4 digits of your phone number</label><input style={p.input} type="tel" maxLength={4} value={phoneLast4} onChange={e=>setPhoneLast4(e.target.value.replace(/\D/g,'').slice(0,4))} placeholder="e.g. 1627" /></div>
       {error && <div style={p.error}>{error}</div>}
-      <button style={p.btn} disabled={loading} onClick={()=>onLogin(email,dob)}>{loading?'Signing in...':'Track my delivery'}</button>
+      <button style={p.btn} disabled={loading} onClick={()=>onLogin(firstName,lastName,phoneLast4)}>{loading?'Signing in...':'Track my delivery'}</button>
     </div>
   )
 }

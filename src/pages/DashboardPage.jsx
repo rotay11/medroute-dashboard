@@ -810,6 +810,39 @@ export default function DashboardPage({ user, onLogout }) {
     } catch {}
   }
 
+  async function printBagSlip(bundleId, patientName) {
+    try {
+      const res = await axios.get(API + '/api/portal/bundle/' + bundleId + '/link')
+      const { portalUrl, qrUrl } = res.data
+      const win = window.open('', '_blank')
+      win.document.write(`
+        <html><head><title>Bag Slip - ${patientName}</title>
+        <style>
+          body { font-family: -apple-system, sans-serif; padding: 20px; text-align: center; }
+          .slip { border: 2px solid #1D9E75; border-radius: 12px; padding: 20px; max-width: 300px; margin: 0 auto; }
+          .logo { color: #1D9E75; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+          .name { font-size: 16px; font-weight: 700; margin: 12px 0 4px; }
+          .scan-text { font-size: 13px; color: #555; margin-bottom: 12px; }
+          .url { font-size: 10px; color: #888; margin-top: 8px; word-break: break-all; }
+          .pharmacy { font-size: 11px; color: #1D9E75; font-weight: 600; margin-top: 12px; }
+        </style></head>
+        <body onload="window.print()">
+          <div class="slip">
+            <div class="logo">MedRouteRx</div>
+            <img src="${qrUrl}" width="160" height="160" />
+            <div class="name">${patientName}</div>
+            <div class="scan-text">Scan to track your delivery</div>
+            <div class="url">${portalUrl}</div>
+            <div class="pharmacy">Clayworth Pharmacy · (510) 537-9402</div>
+          </div>
+        </body></html>
+      `)
+      win.document.close()
+    } catch (err) {
+      alert('Could not generate bag slip')
+    }
+  }
+
   async function loadAlerts() {
     try {
       const { data } = await axios.get(API + '/api/dispatch/alerts', { headers: { Authorization: 'Bearer ' + getToken() } })

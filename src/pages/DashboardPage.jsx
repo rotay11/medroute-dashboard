@@ -59,19 +59,32 @@ function LiveMap({ drivers, liveLocations }) {
     drivers.forEach(driver => {
       const loc = liveLocations[driver.id] || driver.gpsPings?.[0]
       if (!loc) return
+      // Hide stale pings older than 1 hour
+      const pingTime = loc.timestamp ? new Date(loc.timestamp).getTime() : 0
+      const ageMinutes = (Date.now() - pingTime) / 60000
+      if (ageMinutes > 60) {
+        // Remove old marker if exists
+        if (markersRef.current[driver.id]) {
+          map.removeLayer(markersRef.current[driver.id])
+          delete markersRef.current[driver.id]
+        }
+        return
+      }
       const lat = parseFloat(loc.lat), lng = parseFloat(loc.lng)
       if (isNaN(lat) || isNaN(lng)) return
       const color = driver.status === 'ACTIVE' ? '#1D9E75' : '#BA7517'
+      const fullName = driver.firstName + ' ' + driver.lastName
       const icon = window.L.divIcon({
         className: '',
-        html: '<div style="background:' + color + ';width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>',
+        html: '<div style="position:relative;"><div style="background:' + color + ';width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div><div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:2px 6px;border-radius:4px;font-size:10px;white-space:nowrap;font-weight:600">' + fullName + '</div></div>',
         iconSize: [14, 14], iconAnchor: [7, 7],
       })
       if (markersRef.current[driver.id]) {
         markersRef.current[driver.id].setLatLng([lat, lng])
+        markersRef.current[driver.id].setIcon(icon)
       } else {
         const marker = window.L.marker([lat, lng], { icon }).addTo(map)
-          .bindPopup('<b>' + driver.firstName + ' ' + driver.lastName + '</b><br>' + driver.driverId + '<br>' + driver.status)
+          .bindPopup('<b>' + fullName + '</b><br>' + driver.driverId + '<br>Status: ' + driver.status + '<br>Last update: ' + Math.round(ageMinutes) + ' min ago')
         markersRef.current[driver.id] = marker
       }
     })

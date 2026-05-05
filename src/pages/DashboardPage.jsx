@@ -771,6 +771,8 @@ export default function DashboardPage({ user, onLogout }) {
   const [drivers,        setDrivers]        = useState([])
   const [packages,       setPackages]       = useState([])
   const [alerts,         setAlerts]         = useState([])
+  const [alertFilter,    setAlertFilter]    = useState('OPEN')
+  const [selectedAlerts, setSelectedAlerts] = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
   const [activeTab,      setActiveTab]      = useState('map')
   const [liveLocations,  setLiveLocations]  = useState({})
@@ -901,6 +903,50 @@ export default function DashboardPage({ user, onLogout }) {
       loadAlerts()
     } catch (err) {
       alert('Could not ' + action + ' alert')
+    }
+  }
+
+  async function handleDeleteAlert(alertId) {
+    if (!window.confirm('Delete this alert? This cannot be undone.')) return
+    try {
+      await axios.delete(API + '/api/dispatch/alerts/' + alertId, {
+        headers: { Authorization: 'Bearer ' + getToken() }
+      })
+      loadAlerts()
+    } catch (err) {
+      alert('Could not delete alert')
+    }
+  }
+
+  async function handleBulkAction(action) {
+    if (selectedAlerts.length === 0) { alert('No alerts selected'); return }
+    const confirmMsg = action === 'delete' 
+      ? 'Delete ' + selectedAlerts.length + ' alerts? This cannot be undone.'
+      : action.charAt(0).toUpperCase() + action.slice(1) + ' ' + selectedAlerts.length + ' alerts?'
+    if (!window.confirm(confirmMsg)) return
+    try {
+      await Promise.all(selectedAlerts.map(id => 
+        action === 'delete'
+          ? axios.delete(API + '/api/dispatch/alerts/' + id, { headers: { Authorization: 'Bearer ' + getToken() } })
+          : axios.patch(API + '/api/dispatch/alerts/' + id + '/' + action, {}, { headers: { Authorization: 'Bearer ' + getToken() } })
+      ))
+      setSelectedAlerts([])
+      loadAlerts()
+    } catch (err) {
+      alert('Bulk action failed')
+    }
+  }
+
+  function toggleAlertSelection(alertId) {
+    setSelectedAlerts(prev => prev.includes(alertId) ? prev.filter(id => id !== alertId) : [...prev, alertId])
+  }
+
+  function toggleSelectAll() {
+    const filteredAlerts = alerts.filter(a => alertFilter === 'ALL' || (a.status || 'OPEN') === alertFilter)
+    if (selectedAlerts.length === filteredAlerts.length) {
+      setSelectedAlerts([])
+    } else {
+      setSelectedAlerts(filteredAlerts.map(a => a.id))
     }
   }
 
@@ -1130,26 +1176,60 @@ export default function DashboardPage({ user, onLogout }) {
         )}
 
         {activeTab === 'alerts' && (
-          <div style={styles.alertsList}>
-            {alerts.length === 0 && <div style={styles.empty}>No alerts</div>}
-            {alerts.map((alert, i) => (
-              <div key={alert.id || i} style={styles.alertCard}>
-                <div style={{ ...styles.alertDot, background: alert.severity === 'HIGH' ? '#E24B4A' : '#BA7517' }} />
-                <div style={styles.alertBody}>
-                  <div style={styles.alertMsg}>{alert.message || alert.description}</div>
-                  <div style={styles.alertMeta}>{alert.driver?.firstName} {alert.driver?.lastName} · {alert.type} · {new Date(alert.flaggedAt || alert.timestamp).toLocaleTimeString()}</div>
-                </div>
-                <div style={{display:'flex',gap:4,alignItems:'center'}}>
-                  <span style={{ ...styles.pill, ...(alert.status === 'OPEN' ? styles.pillAlert : styles.pillResolved) }}>{alert.status || 'New'}</span>
-                  {(alert.status === 'OPEN' || !alert.status) && (
-                    <React.Fragment>
-                      <button style={{...styles.actionBtn,color:'#1D9E75',borderColor:'#1D9E75',fontSize:10}} onClick={() => handleAlertAction(alert.id, 'resolve')}>Resolve</button>
-                      <button style={{...styles.actionBtn,color:'#888',fontSize:10}} onClick={() => handleAlertAction(alert.id, 'archive')}>Archive</button>
-                    </React.Fragment>
-                  )}
-                </div>
+          <div>
+            <div style={{display:'flex',gap:8,marginBottom:12,padding:'8px 0',borderBottom:'1px solid #eee'}}>
+              {['OPEN','RESOLVED','ARCHIVED','ALL'].map(filter => {
+                const count = filter === 'ALL' ? alerts.length : alerts.filter(a => (a.status || 'OPEN') === filter).length
+                return (
+                  <button key={filter} onClick={() => { setAlertFilter(filter); setSelectedAlerts([]); }} style={{padding:'6px 14px',borderRadius:6,border:'1px solid '+(alertFilter===filter?'#1D9E75':'#ddd'),background:alertFilter===filter?'#1D9E75':'#fff',color:alertFilter===filter?'#fff':'#666',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+                    {filter} ({count})
+                  </button>
+                )
+              })}
+            </div>
+            {selectedAlerts.length > 0 && (
+              <div style={{display:'flex',gap:8,marginBottom:12,padding:8,background:'#f5f5f5',borderRadius:6,alignItems:'center'}}>
+                <span style={{fontSize:12,fontWeight:600}}>{selectedAlerts.length} selected</span>
+                <button style={{padding:'4px 10px',borderRadius:4,border:'1px solid #1D9E75',background:'#fff',color:'#1D9E75',fontSize:11,cursor:'pointer'}} onClick={() => handleBulkAction('resolve')}>Resolve</button>
+                <button style={{padding:'4px 10px',borderRadius:4,border:'1px solid #888',background:'#fff',color:'#888',fontSize:11,cursor:'pointer'}} onClick={() => handleBulkAction('archive')}>Archive</button>
+                <button style={{padding:'4px 10px',borderRadius:4,border:'1px solid #E24B4A',background:'#fff',color:'#E24B4A',fontSize:11,cursor:'pointer'}} onClick={() => handleBulkAction('delete')}>Delete</button>
+                <button style={{padding:'4px 10px',borderRadius:4,border:'1px solid #ddd',background:'#fff',color:'#666',fontSize:11,cursor:'pointer'}} onClick={() => setSelectedAlerts([])}>Clear</button>
               </div>
-            ))}
+            )}
+            <div style={styles.alertsList}>
+              {(() => {
+                const filtered = alerts.filter(a => alertFilter === 'ALL' || (a.status || 'OPEN') === alertFilter)
+                if (filtered.length === 0) return <div style={styles.empty}>No {alertFilter.toLowerCase()} alerts</div>
+                return (
+                  <>
+                    <div style={{display:'flex',alignItems:'center',padding:'4px 12px',background:'#fafafa',fontSize:11,color:'#888',marginBottom:4}}>
+                      <input type="checkbox" checked={selectedAlerts.length === filtered.length && filtered.length > 0} onChange={toggleSelectAll} style={{marginRight:10}} />
+                      Select all
+                    </div>
+                    {filtered.map((alert, i) => (
+                      <div key={alert.id || i} style={{...styles.alertCard,background:selectedAlerts.includes(alert.id)?'#f0f8f5':'#fff'}}>
+                        <input type="checkbox" checked={selectedAlerts.includes(alert.id)} onChange={() => toggleAlertSelection(alert.id)} style={{marginRight:10}} />
+                        <div style={{ ...styles.alertDot, background: alert.severity === 'HIGH' ? '#E24B4A' : '#BA7517' }} />
+                        <div style={styles.alertBody}>
+                          <div style={styles.alertMsg}>{alert.message || alert.description}</div>
+                          <div style={styles.alertMeta}>{alert.driver?.firstName} {alert.driver?.lastName} · {alert.type} · {new Date(alert.flaggedAt || alert.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <div style={{display:'flex',gap:4,alignItems:'center'}}>
+                          <span style={{ ...styles.pill, ...(alert.status === 'OPEN' || !alert.status ? styles.pillAlert : styles.pillResolved) }}>{alert.status || 'OPEN'}</span>
+                          {(alert.status === 'OPEN' || !alert.status) && (
+                            <>
+                              <button style={{...styles.actionBtn,color:'#1D9E75',borderColor:'#1D9E75',fontSize:10}} onClick={() => handleAlertAction(alert.id, 'resolve')}>Resolve</button>
+                              <button style={{...styles.actionBtn,color:'#888',fontSize:10}} onClick={() => handleAlertAction(alert.id, 'archive')}>Archive</button>
+                            </>
+                          )}
+                          <button style={{...styles.actionBtn,color:'#E24B4A',borderColor:'#E24B4A',fontSize:10}} onClick={() => handleDeleteAlert(alert.id)}>Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )
+              })()}
+            </div>
           </div>
         )}
       </div>

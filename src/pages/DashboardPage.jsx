@@ -950,6 +950,19 @@ export default function DashboardPage({ user, onLogout }) {
     }
   }
 
+  async function handleResetPassword(driver) {
+    if (!window.confirm('Reset password for ' + driver.firstName + ' ' + driver.lastName + '?\n\nA new temporary password will be generated. The driver will need to change it on next login.')) return
+    try {
+      const { data } = await axios.post(API + '/api/admin/drivers/' + driver.id + '/reset-password', {}, {
+        headers: { Authorization: 'Bearer ' + getToken() }
+      })
+      alert('Password reset successful!\n\nNew temporary password: ' + data.tempPassword + '\n\nProvide this to the driver. They will be required to change it on next login.')
+      loadDrivers()
+    } catch (err) {
+      alert(err.response?.data?.error || 'Could not reset password')
+    }
+  }
+
   async function handleSuspend(driver) {
     const action = driver.status === 'SUSPENDED' ? 'restore' : 'suspend'
     if (!window.confirm(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + driver.firstName + ' ' + driver.lastName + '?')) return
@@ -1063,6 +1076,7 @@ export default function DashboardPage({ user, onLogout }) {
                               alert('Could not clear route')
                             }
                           }}>Clear Route</button>
+                          <button style={{...styles.actionBtn,color:'#0C447C',borderColor:'#0C447C'}} onClick={() => handleResetPassword(driver)}>Reset Password</button>
                           <button style={{...styles.actionBtn,color:driver.status==='SUSPENDED'?'#1D9E75':'#E24B4A',borderColor:driver.status==='SUSPENDED'?'#1D9E75':'#E24B4A'}} onClick={() => handleSuspend(driver)}>{driver.status==='SUSPENDED'?'Restore':'Suspend'}</button>
                         </div>
                       </td>
